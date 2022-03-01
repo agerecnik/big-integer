@@ -28,8 +28,8 @@ class BigInt
 public:
     BigInt();
     BigInt(const BigInt &obj);
-    BigInt(const std::string &num);
-    BigInt(long long num);
+    BigInt(std::string inputValue);
+    BigInt(long long inputValue);
 
     BigInt &operator=(const BigInt &num);
 

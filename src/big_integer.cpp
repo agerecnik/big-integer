@@ -1,14 +1,41 @@
 #include "big_integer.h"
+#include <cctype>
 
 BigIntNS::BigInt::BigInt() : value({0}), negative(false) {}
 
-BigIntNS::BigInt::BigInt(const std::string &inputValue)
+BigIntNS::BigInt::BigInt(std::string inputValue)
 {
-    // TODO:
-    // Test if inputValue contains only numbers
-    // Remove leading zeros
+    if (inputValue.empty()) {
+        throw std::invalid_argument(
+            "The input string must be a negative or a positive number!");
+    }
 
-    negative = (inputValue[0] == '-') ? true : false;
+    if (inputValue[0] == '-' && inputValue.size() < 2) {
+        throw std::invalid_argument(
+            "The input string must be a negative or a positive number!");
+    }
+
+    if (inputValue[0] != '-' && !isdigit(inputValue[0])) {
+        throw std::invalid_argument(
+            "The input string must be a negative or a positive number!");
+    }
+
+    for (size_t i = 1; i < inputValue.size(); ++i) {
+        if (!isdigit(inputValue[i])) {
+            throw std::invalid_argument(
+                "The input string must be a negative or a positive number!");
+        }
+    }
+
+    if (inputValue[0] == '-' && inputValue.size() > 2) {
+        inputValue.erase(
+            1, std::min(inputValue.find_first_not_of('0', 1) - 1, inputValue.size() - 2));
+    } else if (inputValue[0] != '-' && inputValue.size() > 1) {
+        inputValue.erase(
+            0, std::min(inputValue.find_first_not_of('0'), inputValue.size() - 1));
+    }
+
+    negative = (inputValue[0] == '-' && inputValue[1] != '0') ? true : false;
 
     for (auto itr = inputValue.crbegin(); itr != inputValue.crend(); ++itr) {
         if (*itr == '-') {
@@ -27,12 +54,17 @@ BigIntNS::BigInt::BigInt(const BigInt &obj)
 
 BigIntNS::BigInt::BigInt(long long inputValue)
 {
-    negative = (inputValue < 0) ? true : false;
+    if (inputValue < 0) {
+        negative = true;
+        inputValue *= -1;
+    } else {
+        negative = false;
+    }
 
-    while (inputValue != 0) {
+    do {
         value.push_back(inputValue % 10);
         inputValue /= 10;
-    }
+    } while (inputValue != 0);
 }
 
 BigIntNS::BigInt &BigIntNS::BigInt::operator=(const BigInt &obj)
