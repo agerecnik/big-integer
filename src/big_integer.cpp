@@ -233,6 +233,45 @@ BigIntNS::BigInt &BigIntNS::BigInt::operator-=(const BigInt &rhs)
     return *this;
 }
 
+BigIntNS::BigInt &BigIntNS::BigInt::operator*=(const BigInt &rhs)
+{
+    if ((value.size() == 1 && value[0] == 0) || (rhs.value.size() == 1 && rhs.value[0] == 0)) {
+        value.clear();
+        value.push_back(0);
+        negative = false;
+    } else {
+        std::vector<std::vector<int>> values;
+        for (size_t i = 0; i < value.size(); ++i) {
+            int carryOver = 0;
+            std::vector<int> tempValue(i, 0);
+            for (size_t j = 0; j < rhs.value.size(); ++j) {
+                int temp = value[i] * rhs.value[j] + carryOver;
+                carryOver = temp / 10;
+                temp -= carryOver * 10;
+                tempValue.push_back(temp);
+            }
+            if (carryOver > 0) {
+                tempValue.push_back(carryOver);
+            }
+            values.push_back(tempValue);
+        }
+
+        std::vector<int> sum;
+        for (auto v : values) {
+            sum = addition(sum, v);
+        }
+        value = sum;
+
+        if (negative && rhs.negative) {
+            negative = false;
+        } else if (negative || rhs.negative) {
+            negative = true;
+        }
+    }
+
+    return *this;
+}
+
 BigIntNS::BigInt BigIntNS::operator+(const BigInt &obj)
 {
     return obj;
