@@ -1,5 +1,6 @@
 #include "big_integer.h"
 #include <cctype>
+#include <algorithm>
 
 BigIntNS::BigInt::BigInt() : value({0}), negative(false) {}
 
@@ -101,14 +102,14 @@ bool BigIntNS::operator<(const BigInt &lhs, const BigInt &rhs)
         return false;
 
     } else if (!lhs.negative && !rhs.negative) {
-        int test = BigInt::compareValues(lhs, rhs);
+        int test = BigInt::compareValues(lhs.value, rhs.value);
         if (test == 1 || test == 0) {
             return false;
         }
         return true;
 
     } else {
-        int test = BigInt::compareValues(lhs, rhs);
+        int test = BigInt::compareValues(lhs.value, rhs.value);
         if (test == -1 || test == 0) {
             return false;
         }
@@ -160,12 +161,12 @@ BigIntNS::BigInt BigIntNS::BigInt::operator--(int)
 BigIntNS::BigInt &BigIntNS::BigInt::operator+=(const BigInt &rhs)
 {
     if (!negative && rhs.negative) {
-        if (compareValues(*this, rhs) == -1) {
+        if (compareValues(value, rhs.value) == -1) {
             value = subtraction(rhs.value, value);
             negative = true;
             return *this;
 
-        } else if (compareValues(*this, rhs) == 1) {
+        } else if (compareValues(value, rhs.value) == 1) {
             value = subtraction(value, rhs.value);
             return *this;
 
@@ -175,11 +176,11 @@ BigIntNS::BigInt &BigIntNS::BigInt::operator+=(const BigInt &rhs)
             return *this;
         }
     } else if (negative && !rhs.negative) {
-        if (compareValues(*this, rhs) == -1) {
+        if (compareValues(value, rhs.value) == -1) {
             value = subtraction(rhs.value, value);
             negative = false;
 
-        } else if (compareValues(*this, rhs) == 1) {
+        } else if (compareValues(value, rhs.value) == 1) {
             value = subtraction(value, rhs.value);
 
         } else {
@@ -205,11 +206,11 @@ BigIntNS::BigInt &BigIntNS::BigInt::operator-=(const BigInt &rhs)
         value = addition(value, rhs.value);
 
     } else if (negative && rhs.negative) {
-        if (compareValues(*this, rhs) == -1) {
+        if (compareValues(value, rhs.value) == -1) {
             value = subtraction(rhs.value, value);
             negative = false;
 
-        } else if (compareValues(*this, rhs) == 1) {
+        } else if (compareValues(value, rhs.value) == 1) {
             value = subtraction(value, rhs.value);
 
         } else {
@@ -217,11 +218,11 @@ BigIntNS::BigInt &BigIntNS::BigInt::operator-=(const BigInt &rhs)
             negative = false;
         }
     } else {
-        if (compareValues(*this, rhs) == -1) {
+        if (compareValues(value, rhs.value) == -1) {
             value = subtraction(rhs.value, value);
             negative = true;
 
-        } else if (compareValues(*this, rhs) == 1) {
+        } else if (compareValues(value, rhs.value) == 1) {
             value = subtraction(value, rhs.value);
 
         } else {
@@ -272,6 +273,60 @@ BigIntNS::BigInt &BigIntNS::BigInt::operator*=(const BigInt &rhs)
     return *this;
 }
 
+BigIntNS::BigInt &BigIntNS::BigInt::operator/=(const BigInt &rhs)
+{
+    if ((rhs.value.size() == 1 && rhs.value[0] == 0)) {
+        throw std::invalid_argument("Division by zero.");
+    }
+    if (compareValues(value, rhs.value) == -1) {
+        value.clear();
+        value.push_back(0);
+        negative = false;
+    } else if (compareValues(value, rhs.value) == 0) {
+        value.clear();
+        value.push_back(1);
+        if (negative && rhs.negative) {
+            negative = false;
+        } else if (negative || rhs.negative) {
+            negative = true;
+        }
+    } else {
+        std::vector<int> temp;
+        std::vector<int> result;
+
+        auto valueItr = value.crbegin();
+        while (valueItr != value.crend()) {
+            int counter = 0;
+            temp.insert(temp.begin(), *valueItr);
+            ++valueItr;
+            while (compareValues(temp, rhs.value) >= 0) {
+                temp = subtraction(temp, rhs.value);
+                ++counter;
+            }
+            result.insert(result.begin(), counter);
+
+            std::reverse(temp.begin(), temp.end());
+            auto tempItr = temp.begin();
+            while (tempItr != temp.end() && *tempItr == 0) {
+                tempItr = temp.erase(tempItr);
+            }
+            std::reverse(temp.begin(), temp.end());
+        }
+
+        removeLeadingZeros(result);
+
+        value = result;
+
+        if (negative && rhs.negative) {
+            negative = false;
+        } else if (negative || rhs.negative) {
+            negative = true;
+        }
+    }
+
+    return *this;
+}
+
 BigIntNS::BigInt BigIntNS::operator+(const BigInt &obj)
 {
     return obj;
@@ -300,6 +355,18 @@ BigIntNS::BigInt BigIntNS::operator-(BigInt lhs, const BigInt &rhs)
     return lhs;
 }
 
+BigIntNS::BigInt BigIntNS::operator*(BigInt lhs, const BigInt &rhs)
+{
+    lhs *= rhs;
+    return lhs;
+}
+
+BigIntNS::BigInt BigIntNS::operator/(BigInt lhs, const BigInt &rhs)
+{
+    lhs /= rhs;
+    return lhs;
+}
+
 std::ostream &BigIntNS::operator<<(std::ostream &os, const BigInt &obj)
 {
     std::string strValue;
@@ -325,19 +392,19 @@ std::istream &BigIntNS::operator>>(std::istream &is, BigInt &obj)
     return is;
 }
 
-int BigIntNS::BigInt::compareValues(const BigInt &lhs, const BigInt &rhs)
+int BigIntNS::BigInt::compareValues(const std::vector<int> &lhs, const std::vector<int> &rhs)
 {
-    if (lhs.value.size() > rhs.value.size()) {
+    if (lhs.size() > rhs.size()) {
         return 1;
     }
 
-    if (lhs.value.size() < rhs.value.size()) {
+    if (lhs.size() < rhs.size()) {
         return -1;
     }
 
-    auto itr = lhs.value.crbegin();
-    auto itr2 = rhs.value.crbegin();
-    while (itr != lhs.value.crend()) {
+    auto itr = lhs.crbegin();
+    auto itr2 = rhs.crbegin();
+    while (itr != lhs.crend()) {
         if (*itr > *itr2) {
             return 1;
         }
@@ -439,10 +506,15 @@ BigIntNS::BigInt::subtraction(const std::vector<int> &higher, const std::vector<
         }
     }
 
-    size_t i = tempValue.size() - 1;
-    while (tempValue[i] == 0) {
-        tempValue.pop_back();
+    removeLeadingZeros(tempValue);
+    return tempValue;
+}
+
+void BigIntNS::BigInt::removeLeadingZeros(std::vector<int> &v)
+{
+    size_t i = v.size() - 1;
+    while (v.size() > 1 && v[i] == 0) {
+        v.pop_back();
         --i;
     }
-    return tempValue;
 }
