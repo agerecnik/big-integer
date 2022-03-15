@@ -645,7 +645,6 @@ TEST(big_integer_test, compund_assignment_division_operator)
     EXPECT_EQ(bigInt, refBigInt);
 
     // NEGATIVE /= POSITIVE
-
     bigInt = -571;
     bigInt /= 572;
     refBigInt = 0;
@@ -677,7 +676,6 @@ TEST(big_integer_test, compund_assignment_division_operator)
     EXPECT_EQ(bigInt, refBigInt);
 
     // NEGATIVE /= NEGATIVE
-
     bigInt = -571;
     bigInt /= -572;
     refBigInt = 0;
@@ -735,5 +733,172 @@ TEST(big_integer_test, compund_assignment_division_operator)
     refBigInt =
         std::string("99999999999999999999999999999999999999999999999999999999999999999999"
                     "999999999999993");
+    EXPECT_EQ(bigInt, refBigInt);
+}
+
+TEST(big_integer_test, compund_assignment_modulo_operator)
+{
+    BigIntNS::BigInt bigInt;
+    BigIntNS::BigInt refBigInt;
+
+    // POSITIVE %= POSITIVE
+    bigInt = 571;
+    bigInt %= 572;
+    refBigInt = 571;
+    EXPECT_EQ(bigInt, refBigInt);
+
+    bigInt = 572;
+    bigInt %= 571;
+    refBigInt = 1;
+    EXPECT_EQ(bigInt, refBigInt);
+
+    bigInt = 3840;
+    bigInt %= 571;
+    refBigInt = 414;
+    EXPECT_EQ(bigInt, refBigInt);
+
+    bigInt = 3840;
+    bigInt %= 1;
+    refBigInt = 0;
+    EXPECT_EQ(bigInt, refBigInt);
+
+    bigInt = 571;
+    bigInt %= 3840;
+    refBigInt = 571;
+    EXPECT_EQ(bigInt, refBigInt);
+
+    bigInt = 84;
+    bigInt %= 84;
+    refBigInt = 0;
+    EXPECT_EQ(bigInt, refBigInt);
+
+    // POSITIVE %= NEGATIVE
+    bigInt = 571;
+    bigInt %= -572;
+    refBigInt = 571;
+    EXPECT_EQ(bigInt, refBigInt);
+
+    bigInt = 572;
+    bigInt %= -571;
+    refBigInt = 1;
+    EXPECT_EQ(bigInt, refBigInt);
+
+    bigInt = 3840;
+    bigInt %= -571;
+    refBigInt = 414;
+    EXPECT_EQ(bigInt, refBigInt);
+
+    bigInt = 3840;
+    bigInt %= -1;
+    refBigInt = 0;
+    EXPECT_EQ(bigInt, refBigInt);
+
+    bigInt = 571;
+    bigInt %= -3840;
+    refBigInt = 571;
+    EXPECT_EQ(bigInt, refBigInt);
+
+    bigInt = 84;
+    bigInt %= -84;
+    refBigInt = 0;
+    EXPECT_EQ(bigInt, refBigInt);
+
+    // NEGATIVE %= POSITIVE
+    bigInt = -571;
+    bigInt %= 572;
+    refBigInt = -571;
+    EXPECT_EQ(bigInt, refBigInt);
+
+    bigInt = -572;
+    bigInt %= 571;
+    refBigInt = -1;
+    EXPECT_EQ(bigInt, refBigInt);
+
+    bigInt = -3840;
+    bigInt %= 571;
+    refBigInt = -414;
+    EXPECT_EQ(bigInt, refBigInt);
+
+    bigInt = -3840;
+    bigInt %= 1;
+    refBigInt = 0;
+    EXPECT_EQ(bigInt, refBigInt);
+
+    bigInt = -571;
+    bigInt %= 3840;
+    refBigInt = -571;
+    EXPECT_EQ(bigInt, refBigInt);
+
+    bigInt = -84;
+    bigInt %= 84;
+    refBigInt = 0;
+    EXPECT_EQ(bigInt, refBigInt);
+
+    // NEGATIVE %= NEGATIVE
+    bigInt = -571;
+    bigInt %= -572;
+    refBigInt = -571;
+    EXPECT_EQ(bigInt, refBigInt);
+
+    bigInt = -572;
+    bigInt %= -571;
+    refBigInt = -1;
+    EXPECT_EQ(bigInt, refBigInt);
+
+    bigInt = -3840;
+    bigInt %= -571;
+    refBigInt = -414;
+    EXPECT_EQ(bigInt, refBigInt);
+
+    bigInt = -3840;
+    bigInt %= -1;
+    refBigInt = 0;
+    EXPECT_EQ(bigInt, refBigInt);
+
+    bigInt = -571;
+    bigInt %= -3840;
+    refBigInt = -571;
+    EXPECT_EQ(bigInt, refBigInt);
+
+    bigInt = -84;
+    bigInt %= -84;
+    refBigInt = 0;
+    EXPECT_EQ(bigInt, refBigInt);
+
+    // ZERO
+    bigInt = 0;
+    bigInt %= 3840;
+    refBigInt = 0;
+    EXPECT_EQ(bigInt, refBigInt);
+
+    bigInt = 0;
+    bigInt %= -3840;
+    refBigInt = 0;
+    EXPECT_EQ(bigInt, refBigInt);
+
+    bigInt = 3840;
+    EXPECT_THROW(bigInt %= 0, std::invalid_argument);
+
+    bigInt = -3840;
+    EXPECT_THROW(bigInt %= 0, std::invalid_argument);
+
+    bigInt = 0;
+    EXPECT_THROW(bigInt %= 0, std::invalid_argument);
+
+    // BIG NUMBER
+    bigInt = std::string("99999999999999999999999999999999999999999999999999999999999999999999"
+                         "9999999999999937");
+    bigInt %= std::string("10");
+    refBigInt = std::string("7");
+    EXPECT_EQ(bigInt, refBigInt);
+
+    bigInt = std::string("99999999999999999999999999999999999999999999999999999999999999999999"
+                         "9999999999999937");
+    bigInt %=
+        std::string("99999999999999999999999999999999999999999999999999999999999999999999"
+                    "99999999999999377");
+    refBigInt =
+        std::string("99999999999999999999999999999999999999999999999999999999999999999999"
+                    "9999999999999937");
     EXPECT_EQ(bigInt, refBigInt);
 }

@@ -48,7 +48,7 @@ private:
     std::vector<int> value;
     bool negative;
 
-    static int compareValues(const std::vector<int> &lhs, const std::vector<int> &rhs);
+    static int compareAbsoluteValues(const std::vector<int> &lhs, const std::vector<int> &rhs);
     static std::vector<int> addition(const std::vector<int> &lhs, const std::vector<int> &rhs);
     static std::vector<int>
     subtraction(const std::vector<int> &higher, const std::vector<int> &lower);
