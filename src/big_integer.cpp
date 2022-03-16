@@ -119,7 +119,7 @@ bool BigIntNS::operator<(const BigInt &lhs, const BigInt &rhs)
 
 bool BigIntNS::operator>(const BigInt &lhs, const BigInt &rhs)
 {
-    return !(lhs < rhs);
+    return !(lhs < rhs) && !(lhs == rhs);
 }
 
 bool BigIntNS::operator<=(const BigInt &lhs, const BigInt &rhs)
